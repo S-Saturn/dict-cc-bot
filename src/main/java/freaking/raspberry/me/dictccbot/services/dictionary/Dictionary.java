@@ -60,6 +60,7 @@ public class Dictionary {
 
         } catch (Exception e) {
             System.out.println(LOADING_DICT_ERROR_MSG);
+            e.printStackTrace();
         }
     }
 

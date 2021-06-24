@@ -8,6 +8,8 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import java.io.File;
 
 public class DictCcBotApp {
+//    private static final Logger log = LogManager.getLogger(DictCcBotApp.class);
+
     private static final String ENV_VARS_NOT_FOUND_MESSAGE = "Cannot run the translate bot: make sure that the " +
             "environment variables TRANSLATE_BOT_NAME, TRANSLATE_BOT_TOKEN, and DICT_CC_BOT_DIR_PATH are defined " +
             "and accessible";
@@ -37,7 +39,7 @@ public class DictCcBotApp {
         }
 
         if (new File(databaseDirectoryPath).exists()) {
-            TranslationService.loadDictionary(databaseDirectoryPath);
+            TranslationService.loadDictionaries(databaseDirectoryPath);
         } else {
             System.out.println(DB_DIR_NOT_FOUND);
             return;
@@ -48,7 +50,9 @@ public class DictCcBotApp {
             DictCcBot dictCcBot = new DictCcBot(botName, botToken);
             telegramBotsApi.registerBot(dictCcBot);
         } catch (TelegramApiException e) {
+//            log.error(TELEGRAM_API_NOT_ACCESSIBLE_MESSAGE, e);
             System.out.println(TELEGRAM_API_NOT_ACCESSIBLE_MESSAGE);
+            e.printStackTrace();
         }
     }
 }
