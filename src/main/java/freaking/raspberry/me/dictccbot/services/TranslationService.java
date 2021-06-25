@@ -23,7 +23,7 @@ public class TranslationService {
         counter = fillResponseWithEntries(exactEntries, response, counter, topEntryLimit);
         response.append("-----------------------\n");
         counter = fillResponseWithEntries(partialEntries, response, counter, topEntryLimit);
-        return ResultTableFormatter.formatEntriesToTable(translationDirection, exactEntries); // TODO: add switch for exact/partial entries
+        return ResultTableFormatter.formatEntriesToTable(exactEntries); // TODO: add switch for exact/partial entries
     }
 
     private static int fillResponseWithEntries(List<Entry> entries, StringBuilder response, int counter, int topEntryLimit) {

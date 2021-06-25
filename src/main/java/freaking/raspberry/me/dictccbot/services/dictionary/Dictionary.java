@@ -15,7 +15,6 @@ public class Dictionary {
 
     private final Map<String, Set<UUID>> wordMap = new HashMap<>();
     private final Map<UUID, Entry> entryMap = new HashMap<>();
-    private TranslationDirection translationDirection;
 
     public Dictionary(String file) {
         try {
@@ -45,14 +44,7 @@ public class Dictionary {
                         }
                     } catch (ArrayIndexOutOfBoundsException ignored) {
                     }
-                } else {
-                    if (line.matches(".*\\s\\w+?-\\w+?\\s.*")) {
-                        Language languageFrom = Language.valueOf(line.replaceAll(".*\\s(\\w+?)-(\\w+?)\\s.*", "$1"));
-                        Language languageTo = Language.valueOf(line.replaceAll(".*\\s(\\w+?)-(\\w+?)\\s.*", "$2"));
-                        translationDirection = new TranslationDirection(languageFrom, languageTo);
-                    }
                 }
-
                 line = br.readLine();
             }
 
