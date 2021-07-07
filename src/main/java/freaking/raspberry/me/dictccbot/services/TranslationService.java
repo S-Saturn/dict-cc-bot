@@ -17,27 +17,7 @@ public class TranslationService {
         List<Entry> exactEntries = getExactEntries(input);
         List<Entry> partialEntries = getPartialMatchedEntries(input);
 
-        StringBuilder response = new StringBuilder();
-        int counter = 1;
-        int topEntryLimit = 10;
-        counter = fillResponseWithEntries(exactEntries, response, counter, topEntryLimit);
-        response.append("-----------------------\n");
-        counter = fillResponseWithEntries(partialEntries, response, counter, topEntryLimit);
         return ResultTableFormatter.formatEntriesToTable(exactEntries); // TODO: add switch for exact/partial entries
-    }
-
-    private static int fillResponseWithEntries(List<Entry> entries, StringBuilder response, int counter, int topEntryLimit) {
-        for (int i = 0; i < Math.min(entries.size(), topEntryLimit); i++) {
-            Entry exactEntry = entries.get(i);
-            response.append(counter)
-                    .append(". ")
-                    .append(exactEntry.getLanguage1())
-                    .append(" - ")
-                    .append(exactEntry.getLanguage2())
-                    .append("\n");
-            counter++;
-        }
-        return counter;
     }
 
     public static ArrayList<Entry> getExactEntries(String word) {
