@@ -14,9 +14,9 @@ public class ChangeTranslationDirectionCommand implements CustomCommand {
         TranslationDirection newTranslationDirection = TranslationService.getTranslationDirection();
 
         return "Translation direction changed to "
-                + newTranslationDirection.getLanguageFrom().getEmoji()
+                + newTranslationDirection.getLanguageFrom().getEmoji().getString()
                 + " " + Emoji.ARROW_RIGHT.getString() + " "
-                + newTranslationDirection.getLanguageFrom().getEmoji();
+                + newTranslationDirection.getLanguageTo().getEmoji().getString();
     }
 
     @Override

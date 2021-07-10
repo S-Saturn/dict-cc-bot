@@ -46,7 +46,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
 
                     ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
                     KeyboardRow keyboardRow = new KeyboardRow();
-                    KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmoji() + " Change Translation Direction");
+                    KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmoji().getString());
                     keyboardRow.add(changeTranslationDirectionButton);
                     List<KeyboardRow> keyboardRows = new ArrayList<>();
                     keyboardRows.add(keyboardRow);
@@ -72,30 +72,34 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
     }
 
     private boolean processCustomCommand(long chatId, String string) {
-        CustomCommandName customCommandName = CustomCommandName.getCustomCommandNameByEmoji(string);
-        String message = "";
-        switch (customCommandName) {
-            case CHANGE_TRANSLATION_DIRECTION:
-                message = new ChangeTranslationDirectionCommand().execute();
-                break;
-            case NEXT_PAGE:
-            case PREVIOUS_PAGE:
-                // NOT IMPLEMENTED YET
-                break;
-            default:
-                return false;
-        }
-
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(message);
-        sendMessage.setParseMode(ParseMode.MARKDOWN);
         try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+            CustomCommandName customCommandName = CustomCommandName.getCustomCommandNameByEmoji(string);
+            String message = "";
+            switch (customCommandName) {
+                case CHANGE_TRANSLATION_DIRECTION:
+                    message = new ChangeTranslationDirectionCommand().execute();
+                    break;
+                case NEXT_PAGE:
+                case PREVIOUS_PAGE:
+                    // NOT IMPLEMENTED YET
+                    break;
+                default:
+                    return false;
+            }
+
+            SendMessage sendMessage = new SendMessage();
+            sendMessage.setChatId(String.valueOf(chatId));
+            sendMessage.setText(message);
+            sendMessage.setParseMode(ParseMode.MARKDOWN);
+            try {
+                execute(sendMessage);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
-        return true;
     }
 }
 
