@@ -1,5 +1,6 @@
 package freaking.raspberry.me.dictccbot.services;
 
+import freaking.raspberry.me.dictccbot.model.EntryPrecision;
 import freaking.raspberry.me.dictccbot.model.Language;
 import freaking.raspberry.me.dictccbot.model.TranslationDirection;
 import freaking.raspberry.me.dictccbot.services.dictionary.Dictionary;
@@ -11,14 +12,26 @@ import java.util.*;
 
 public class TranslationService {
     private static TranslationDirection translationDirection = new TranslationDirection(Language.DE, Language.EN); // Setting default translation direction
+    private static EntryPrecision entryPrecision = EntryPrecision.EXACT; // Setting default entity precision
+
     public static Map<TranslationDirection, Dictionary> dictionaryMap = new HashMap<>();
 
     public static String translate(String input) {
         List<Entry> exactEntries = getExactEntries(input);
         List<Entry> partialEntries = getPartialMatchedEntries(input);
 
+        List<Entry> entries = new ArrayList<>();
+        switch (entryPrecision) {
+            case PARTIAL:
+                entries = getPartialMatchedEntries(input);
+                break;
+            case EXACT:
+            default:
+                entries = getExactEntries(input);
+                break;
+        }
         return ResultTableFormatter.formatEntriesToTable(exactEntries); // TODO: add switch for exact/partial entries
-    }
+}
 
     public static ArrayList<Entry> getExactEntries(String word) {
         Dictionary dictionary = dictionaryMap.get(translationDirection);
@@ -56,7 +69,11 @@ public class TranslationService {
         return new Dictionary(dictionaryFile);
     }
 
-    public static void setTranslationDirection(TranslationDirection translationDirection) {
-        TranslationService.translationDirection = translationDirection;
+    public static void swapTranslationDirection() {
+        TranslationService.translationDirection = TranslationService.translationDirection.getSwappedTranslationDirection();
+    }
+
+    public static TranslationDirection getTranslationDirection() {
+        return translationDirection;
     }
 }
