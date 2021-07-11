@@ -19,15 +19,16 @@ public class Entry {
 
         String all = language1 + " " + language2;
 
-		all = all.replaceAll("\\[.+?]", "");
-		all = all.replaceAll("\\{.+?}", "");
-		for (String word : all.split("[\\s-]")) {
-			word = word.toLowerCase().replaceAll("[^A-Za-zÄÖÜäöüáÁàÀéÉèÈúÚùÙíÍìÌóÓòÒýÝß]", "");
-			if (word.length() > 1) {
-				words.add(word);
-			}
-		}
-	}
+        all = all.replaceAll("\\[.+?]", "");
+        all = all.replaceAll("\\{.+?}", "");
+        for (String word : all.split("[\\s-]")) {
+            String regex = "[^A-Za-zÄÖÜäöüáÁàÀéÉèÈúÚùÙíÍìÌóÓòÒýÝß]";
+            word = word.toLowerCase().replaceAll(regex, "");
+            if (word.length() > 1) {
+                words.add(word);
+            }
+        }
+    }
 
     public int getRelevance() {
         int t = 64 * wordHit + 8 * (8 - Math.min(8, getLength()));
