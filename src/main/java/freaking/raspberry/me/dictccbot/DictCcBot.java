@@ -3,8 +3,12 @@ package freaking.raspberry.me.dictccbot;
 import freaking.raspberry.me.dictccbot.commands.HelpCommand;
 import freaking.raspberry.me.dictccbot.commands.custom.ChangePrecisionCommand;
 import freaking.raspberry.me.dictccbot.commands.custom.ChangeTranslationDirectionCommand;
+import freaking.raspberry.me.dictccbot.commands.custom.NextPageCommand;
+import freaking.raspberry.me.dictccbot.commands.custom.PreviousPageCommand;
 import freaking.raspberry.me.dictccbot.model.CustomCommandName;
 import freaking.raspberry.me.dictccbot.services.TranslationService;
+import freaking.raspberry.me.dictccbot.services.dictionary.Entry;
+import freaking.raspberry.me.dictccbot.services.formatter.ResultTableFormatter;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -20,6 +24,8 @@ import java.util.List;
 public class DictCcBot extends TelegramLongPollingCommandBot {
     private final String botUsername;
     private final String botToken;
+
+    private String currentRequest = "";
 
     DictCcBot(final String botUsername, final String botToken) {
         this.botUsername = botUsername;
@@ -38,9 +44,17 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             try {
                 long chatId = update.getMessage().getChatId();
                 boolean isCustomCommand = processCustomCommand(chatId, update.getMessage().getText());
+                String result;
                 if (!isCustomCommand) {
-                    String translation = TranslationService.translate(update.getMessage().getText());
-                    sendMessageWithKeyboard(translation, chatId);
+                    String input = update.getMessage().getText();
+                    if (!currentRequest.equals(input)) {
+                        List<Entry> translation = TranslationService.translate(input);
+                        result = ResultTableFormatter.formatNewEntriesToTable(translation);
+                        currentRequest = input;
+                    } else {
+                        result = ResultTableFormatter.formatExistingEntriesToTable();
+                    }
+                    sendMessageWithKeyboard(result, chatId);
                 }
             } catch (TelegramApiException e) {
                 e.printStackTrace();
@@ -61,7 +75,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
-        message.setParseMode(ParseMode.HTML);
+        message.setParseMode(ParseMode.MARKDOWN);
 
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         KeyboardRow keyboardRow = new KeyboardRow();
@@ -80,7 +94,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
     private boolean processCustomCommand(long chatId, String string) throws TelegramApiException {
         try {
             CustomCommandName customCommandName = CustomCommandName.getCustomCommandNameByEmoji(string);
-            String message = "";
+            String message;
             switch (customCommandName) {
                 case CHANGE_TRANSLATION_DIRECTION:
                     message = new ChangeTranslationDirectionCommand().execute();
@@ -89,8 +103,10 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
                     message = new ChangePrecisionCommand().execute();
                     break;
                 case NEXT_PAGE:
+                    message = new NextPageCommand().execute();
+                    break;
                 case PREVIOUS_PAGE:
-                    // NOT IMPLEMENTED YET
+                    message = new PreviousPageCommand().execute();
                     break;
                 default:
                     return false;

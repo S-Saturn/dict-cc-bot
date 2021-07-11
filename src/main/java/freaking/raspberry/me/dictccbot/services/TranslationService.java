@@ -5,7 +5,6 @@ import freaking.raspberry.me.dictccbot.model.Language;
 import freaking.raspberry.me.dictccbot.model.TranslationDirection;
 import freaking.raspberry.me.dictccbot.services.dictionary.Dictionary;
 import freaking.raspberry.me.dictccbot.services.dictionary.Entry;
-import freaking.raspberry.me.dictccbot.services.formatter.ResultTableFormatter;
 
 import java.io.File;
 import java.util.*;
@@ -16,7 +15,7 @@ public class TranslationService {
 
     public static Map<TranslationDirection, Dictionary> dictionaryMap = new HashMap<>();
 
-    public static String translate(String input) {
+    public static List<Entry> translate(String input) {
         List<Entry> entries;
         switch (entryPrecision) {
             case PARTIAL:
@@ -27,19 +26,11 @@ public class TranslationService {
                 entries = getExactEntries(input);
                 break;
         }
-        return ResultTableFormatter.formatEntriesToTable(entries);
+        return entries;
     }
 
     public static ArrayList<Entry> getExactEntries(String word) {
         Dictionary dictionary = dictionaryMap.get(translationDirection);
-        List<Entry> exactEntries = new ArrayList<>(dictionary.getExactEntries(word));
-        if (exactEntries.isEmpty()) {
-            exactEntries.add(new Entry("Kein Eintrag gefunden", "No entry found"));
-        }
-        List<Entry> partialEntries = new ArrayList<>(dictionary.getPartialMatchedEntries(word));
-        if (partialEntries.isEmpty()) {
-            partialEntries.add(new Entry("Kein Eintrag gefunden", "No entry found"));
-        }
         return dictionary.getExactEntries(word);
     }
 
