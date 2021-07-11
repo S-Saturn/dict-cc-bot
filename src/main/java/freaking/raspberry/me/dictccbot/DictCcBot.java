@@ -1,6 +1,7 @@
 package freaking.raspberry.me.dictccbot;
 
 import freaking.raspberry.me.dictccbot.commands.HelpCommand;
+import freaking.raspberry.me.dictccbot.commands.custom.ChangePrecisionCommand;
 import freaking.raspberry.me.dictccbot.commands.custom.ChangeTranslationDirectionCommand;
 import freaking.raspberry.me.dictccbot.model.CustomCommandName;
 import freaking.raspberry.me.dictccbot.services.TranslationService;
@@ -36,24 +37,10 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             try {
                 long chatId = update.getMessage().getChatId();
-                SendMessage message = new SendMessage();
                 boolean isCustomCommand = processCustomCommand(chatId, update.getMessage().getText());
                 if (!isCustomCommand) {
                     String translation = TranslationService.translate(update.getMessage().getText());
-                    message.setChatId(String.valueOf(chatId));
-                    message.setText(translation);
-                    message.setParseMode(ParseMode.HTML);
-
-                    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-                    KeyboardRow keyboardRow = new KeyboardRow();
-                    KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmoji().getString());
-                    keyboardRow.add(changeTranslationDirectionButton);
-                    List<KeyboardRow> keyboardRows = new ArrayList<>();
-                    keyboardRows.add(keyboardRow);
-                    replyKeyboardMarkup.setKeyboard(keyboardRows);
-                    message.setReplyMarkup(replyKeyboardMarkup);
-
-                    execute(message);
+                    sendMessageWithKeyboard(translation, chatId);
                 }
             } catch (TelegramApiException e) {
                 e.printStackTrace();
@@ -68,16 +55,38 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
 
     @Override
     public void onRegister() {
-
     }
 
-    private boolean processCustomCommand(long chatId, String string) {
+    private void sendMessageWithKeyboard(String text, long chatId) throws TelegramApiException {
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(text);
+        message.setParseMode(ParseMode.HTML);
+
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        KeyboardRow keyboardRow = new KeyboardRow();
+        KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmojiList().get(0).getString());
+        KeyboardButton changeEntryPrecisionButton = new KeyboardButton(TranslationService.getEntryPrecision().getEmoji().getString());
+        keyboardRow.add(changeTranslationDirectionButton);
+        keyboardRow.add(changeEntryPrecisionButton);
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        keyboardRows.add(keyboardRow);
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        message.setReplyMarkup(replyKeyboardMarkup);
+
+        execute(message);
+    }
+
+    private boolean processCustomCommand(long chatId, String string) throws TelegramApiException {
         try {
             CustomCommandName customCommandName = CustomCommandName.getCustomCommandNameByEmoji(string);
             String message = "";
             switch (customCommandName) {
                 case CHANGE_TRANSLATION_DIRECTION:
                     message = new ChangeTranslationDirectionCommand().execute();
+                    break;
+                case CHANGE_PRECISION:
+                    message = new ChangePrecisionCommand().execute();
                     break;
                 case NEXT_PAGE:
                 case PREVIOUS_PAGE:
@@ -86,16 +95,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
                 default:
                     return false;
             }
-
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setChatId(String.valueOf(chatId));
-            sendMessage.setText(message);
-            sendMessage.setParseMode(ParseMode.MARKDOWN);
-            try {
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+            sendMessageWithKeyboard(message, chatId);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

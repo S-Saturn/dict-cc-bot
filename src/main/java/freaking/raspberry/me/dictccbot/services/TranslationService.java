@@ -17,10 +17,7 @@ public class TranslationService {
     public static Map<TranslationDirection, Dictionary> dictionaryMap = new HashMap<>();
 
     public static String translate(String input) {
-        List<Entry> exactEntries = getExactEntries(input);
-        List<Entry> partialEntries = getPartialMatchedEntries(input);
-
-        List<Entry> entries = new ArrayList<>();
+        List<Entry> entries;
         switch (entryPrecision) {
             case PARTIAL:
                 entries = getPartialMatchedEntries(input);
@@ -30,8 +27,8 @@ public class TranslationService {
                 entries = getExactEntries(input);
                 break;
         }
-        return ResultTableFormatter.formatEntriesToTable(exactEntries); // TODO: add switch for exact/partial entries
-}
+        return ResultTableFormatter.formatEntriesToTable(entries);
+    }
 
     public static ArrayList<Entry> getExactEntries(String word) {
         Dictionary dictionary = dictionaryMap.get(translationDirection);
@@ -73,7 +70,19 @@ public class TranslationService {
         TranslationService.translationDirection = TranslationService.translationDirection.getSwappedTranslationDirection();
     }
 
+    public static void changePrecision() {
+        if (entryPrecision == EntryPrecision.EXACT) {
+            entryPrecision = EntryPrecision.PARTIAL;
+        } else {
+            entryPrecision = EntryPrecision.EXACT;
+        }
+    }
+
     public static TranslationDirection getTranslationDirection() {
         return translationDirection;
+    }
+
+    public static EntryPrecision getEntryPrecision() {
+        return entryPrecision;
     }
 }

@@ -1,8 +1,5 @@
 package freaking.raspberry.me.dictccbot.services.dictionary;
 
-import freaking.raspberry.me.dictccbot.model.Language;
-import freaking.raspberry.me.dictccbot.model.TranslationDirection;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
