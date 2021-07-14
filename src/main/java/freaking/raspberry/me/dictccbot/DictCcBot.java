@@ -77,18 +77,44 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         message.setText(text);
         message.setParseMode(ParseMode.MARKDOWN);
 
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        KeyboardRow keyboardRow = new KeyboardRow();
-        KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmojiList().get(0).getString());
-        KeyboardButton changeEntryPrecisionButton = new KeyboardButton(TranslationService.getEntryPrecision().getEmoji().getString());
-        keyboardRow.add(changeTranslationDirectionButton);
-        keyboardRow.add(changeEntryPrecisionButton);
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        keyboardRows.add(keyboardRow);
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        ReplyKeyboardMarkup replyKeyboardMarkup = createKeyboard();
         message.setReplyMarkup(replyKeyboardMarkup);
 
         execute(message);
+    }
+
+    private ReplyKeyboardMarkup createKeyboard() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        KeyboardRow settingsKeyboardRow = new KeyboardRow();
+        KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmojiList().get(0).getString());
+        KeyboardButton changeEntryPrecisionButton = new KeyboardButton(TranslationService.getEntryPrecision().getEmoji().getString());
+        settingsKeyboardRow.add(changeTranslationDirectionButton);
+        settingsKeyboardRow.add(changeEntryPrecisionButton);
+        keyboardRows.add(settingsKeyboardRow);
+
+        for (Integer key : ResultTableFormatter.getCurrentPageEntries().keySet()) {
+            String value = ResultTableFormatter.getCurrentPageEntries().get(key);
+            KeyboardButton entryButton = new KeyboardButton(value);
+            KeyboardRow entryRow = new KeyboardRow();
+            entryRow.add(entryButton);
+            keyboardRows.add(entryRow);
+        }
+
+        KeyboardRow paginationKeyboardRow = new KeyboardRow();
+        int pageNumber = ResultTableFormatter.getPageNumber();
+        if (pageNumber != 1) {
+            KeyboardButton previousPageKeyboardButton = new KeyboardButton(CustomCommandName.PREVIOUS_PAGE.getEmojiList().get(0).getString());
+            paginationKeyboardRow.add(previousPageKeyboardButton);
+        }
+        paginationKeyboardRow.add("*" + pageNumber + "*");
+        if (pageNumber - 1 == ResultTableFormatter.getTotalPagesNumber()) {
+            KeyboardButton nextPageKeyboardButton = new KeyboardButton(CustomCommandName.NEXT_PAGE.getEmojiList().get(0).getString());
+            paginationKeyboardRow.add(nextPageKeyboardButton);
+        }
+        keyboardRows.add(paginationKeyboardRow);
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        return replyKeyboardMarkup;
     }
 
     private boolean processCustomCommand(long chatId, String string) throws TelegramApiException {

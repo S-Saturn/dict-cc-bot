@@ -4,12 +4,15 @@ import freaking.raspberry.me.dictccbot.services.dictionary.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ResultTableFormatter {
     private static final int ENTRIES_COUNT_TO_DISPLAY = 10;
 
-    private static int pageNumber = 0;
+    private static int pageNumber = 1;
     private static final List<Entry> currentRequestEntries = new ArrayList<>();
+    private static final TreeMap<Integer, String> currentPageEntries = new TreeMap<>();
 
     public static String formatExistingEntriesToTable() {
         return formatEntriesToTable(currentRequestEntries);
@@ -18,20 +21,22 @@ public class ResultTableFormatter {
     public static String formatNewEntriesToTable(List<Entry> entryList) {
         currentRequestEntries.clear();
         currentRequestEntries.addAll(entryList);
-        pageNumber = 0;
+        pageNumber = 1;
 
         return formatEntriesToTable(entryList);
     }
 
     public static String formatEntriesToTable(List<Entry> entryList) {
-        List<Entry> entriesOfPage = entryList.subList(pageNumber * ENTRIES_COUNT_TO_DISPLAY, Math.min((pageNumber + 1) * ENTRIES_COUNT_TO_DISPLAY, entryList.size()));
+        TreeMap<Integer, String> resultPageEntriesMap = new TreeMap<>();
+        List<Entry> entriesOfPage = entryList.subList((pageNumber - 1) * ENTRIES_COUNT_TO_DISPLAY, Math.min(pageNumber * ENTRIES_COUNT_TO_DISPLAY, entryList.size()));
         if (entriesOfPage.isEmpty()) {
             return "*No entries found*";
         }
-        StringBuilder result = new StringBuilder();
+        StringBuilder resultMessageBuilder = new StringBuilder();
         for (int i = 1; i <= entriesOfPage.size(); i++) {
             Entry entry = entriesOfPage.get(i - 1);
-            result.append("*")
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("*")
                     .append(i)
                     .append(". ")
                     .append(entry.getLanguage1())
@@ -41,21 +46,29 @@ public class ResultTableFormatter {
             boolean typeOrClassificationPresent = false;
             if (entry.getType() != null && entry.getType() != null) {
                 typeOrClassificationPresent = true;
-                result.append(entry.getType());
+                stringBuilder.append(entry.getType());
                 if (entry.getClassification() != null && !entry.getClassification().isEmpty()) {
-                    result.append(", ");
+                    stringBuilder.append(", ");
                 }
             }
             if (entry.getClassification() != null && !entry.getClassification().isEmpty()) {
                 typeOrClassificationPresent = true;
-                result.append(entry.getClassification());
+                stringBuilder.append(entry.getClassification());
             }
             if (typeOrClassificationPresent) {
-                result.append("\n");
+                stringBuilder.append("\n");
             }
-            result.append("\n");
+            stringBuilder.append("\n");
+            resultPageEntriesMap.put(i, stringBuilder.toString());
+            resultMessageBuilder.append(stringBuilder);
         }
-        return result.toString();
+        currentPageEntries.clear();
+        currentPageEntries.putAll(resultPageEntriesMap);
+        return resultMessageBuilder.toString();
+    }
+
+    public static TreeMap<Integer, String> getCurrentPageEntries() {
+        return currentPageEntries;
     }
 
     public static void increasePageNumber() {
@@ -65,4 +78,18 @@ public class ResultTableFormatter {
     public static void decreasePageNumber() {
         pageNumber--;
     }
+
+    public static int getPageNumber() {
+        return pageNumber;
+    }
+
+    public static int getTotalPagesNumber() {
+        int div = currentRequestEntries.size() / ENTRIES_COUNT_TO_DISPLAY;
+        if (currentRequestEntries.size() % ENTRIES_COUNT_TO_DISPLAY == 0) {
+            return div;
+        } else {
+            return div + 1;
+        }
+    }
+
 }
