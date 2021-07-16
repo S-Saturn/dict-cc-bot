@@ -107,8 +107,8 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             KeyboardButton previousPageKeyboardButton = new KeyboardButton(CustomCommandName.PREVIOUS_PAGE.getEmojiList().get(0).getString());
             paginationKeyboardRow.add(previousPageKeyboardButton);
         }
-        paginationKeyboardRow.add("*" + pageNumber + "*");
-        if (pageNumber - 1 == ResultTableFormatter.getTotalPagesNumber()) {
+        paginationKeyboardRow.add(String.valueOf(pageNumber));
+        if (pageNumber - 1 != ResultTableFormatter.getTotalPagesNumber()) {
             KeyboardButton nextPageKeyboardButton = new KeyboardButton(CustomCommandName.NEXT_PAGE.getEmojiList().get(0).getString());
             paginationKeyboardRow.add(nextPageKeyboardButton);
         }
@@ -130,9 +130,11 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
                     break;
                 case NEXT_PAGE:
                     message = new NextPageCommand().execute();
+                    sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
                     break;
                 case PREVIOUS_PAGE:
                     message = new PreviousPageCommand().execute();
+                    sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
                     break;
                 default:
                     return false;

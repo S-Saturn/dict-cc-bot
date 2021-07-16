@@ -4,11 +4,10 @@ import freaking.raspberry.me.dictccbot.services.dictionary.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class ResultTableFormatter {
-    private static final int ENTRIES_COUNT_TO_DISPLAY = 10;
+    private static final int ENTRIES_COUNT_TO_DISPLAY = 5;
 
     private static int pageNumber = 1;
     private static final List<Entry> currentRequestEntries = new ArrayList<>();
@@ -35,32 +34,34 @@ public class ResultTableFormatter {
         StringBuilder resultMessageBuilder = new StringBuilder();
         for (int i = 1; i <= entriesOfPage.size(); i++) {
             Entry entry = entriesOfPage.get(i - 1);
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("*")
-                    .append(i)
+            StringBuilder pageEntryStringBuilder = new StringBuilder();
+            pageEntryStringBuilder.append((pageNumber - 1) * ENTRIES_COUNT_TO_DISPLAY + i)
                     .append(". ")
                     .append(entry.getLanguage1())
                     .append(" \u27A1 ")
-                    .append(entry.getLanguage2())
+                    .append(entry.getLanguage2());
+            StringBuilder markdownFormattedstringBuilder = new StringBuilder();
+            markdownFormattedstringBuilder.append("*")
+                    .append(pageEntryStringBuilder)
                     .append("*\n");
             boolean typeOrClassificationPresent = false;
             if (entry.getType() != null && entry.getType() != null) {
                 typeOrClassificationPresent = true;
-                stringBuilder.append(entry.getType());
+                markdownFormattedstringBuilder.append(entry.getType());
                 if (entry.getClassification() != null && !entry.getClassification().isEmpty()) {
-                    stringBuilder.append(", ");
+                    markdownFormattedstringBuilder.append(", ");
                 }
             }
             if (entry.getClassification() != null && !entry.getClassification().isEmpty()) {
                 typeOrClassificationPresent = true;
-                stringBuilder.append(entry.getClassification());
+                markdownFormattedstringBuilder.append(entry.getClassification());
             }
             if (typeOrClassificationPresent) {
-                stringBuilder.append("\n");
+                markdownFormattedstringBuilder.append("\n");
             }
-            stringBuilder.append("\n");
-            resultPageEntriesMap.put(i, stringBuilder.toString());
-            resultMessageBuilder.append(stringBuilder);
+            markdownFormattedstringBuilder.append("\n");
+            resultPageEntriesMap.put(i, pageEntryStringBuilder.toString());
+            resultMessageBuilder.append(markdownFormattedstringBuilder);
         }
         currentPageEntries.clear();
         currentPageEntries.putAll(resultPageEntriesMap);
