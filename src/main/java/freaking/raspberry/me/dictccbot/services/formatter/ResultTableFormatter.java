@@ -29,6 +29,8 @@ public class ResultTableFormatter {
         TreeMap<Integer, String> resultPageEntriesMap = new TreeMap<>();
         List<Entry> entriesOfPage = entryList.subList((pageNumber - 1) * ENTRIES_COUNT_TO_DISPLAY, Math.min(pageNumber * ENTRIES_COUNT_TO_DISPLAY, entryList.size()));
         if (entriesOfPage.isEmpty()) {
+            currentRequestEntries.clear();
+            currentPageEntries.clear();
             return "*No entries found*";
         }
         StringBuilder resultMessageBuilder = new StringBuilder();
@@ -60,7 +62,7 @@ public class ResultTableFormatter {
                 markdownFormattedstringBuilder.append("\n");
             }
             markdownFormattedstringBuilder.append("\n");
-            resultPageEntriesMap.put(i, pageEntryStringBuilder.toString());
+            resultPageEntriesMap.put((pageNumber - 1) * ENTRIES_COUNT_TO_DISPLAY + i, pageEntryStringBuilder.toString());
             resultMessageBuilder.append(markdownFormattedstringBuilder);
         }
         currentPageEntries.clear();

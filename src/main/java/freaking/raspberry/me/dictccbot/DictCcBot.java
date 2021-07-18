@@ -96,26 +96,28 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         settingsKeyboardRow.add(changeEntryPrecisionButton);
         keyboardRows.add(settingsKeyboardRow);
 
-        for (Integer key : ResultTableFormatter.getCurrentPageEntries().keySet()) {
-            String value = ResultTableFormatter.getCurrentPageEntries().get(key);
-            KeyboardButton entryButton = new KeyboardButton(value);
-            KeyboardRow entryRow = new KeyboardRow();
-            entryRow.add(entryButton);
-            keyboardRows.add(entryRow);
-        }
+        if (!ResultTableFormatter.getCurrentPageEntries().isEmpty()) {
+            for (Integer key : ResultTableFormatter.getCurrentPageEntries().keySet()) {
+                String value = ResultTableFormatter.getCurrentPageEntries().get(key);
+                KeyboardButton entryButton = new KeyboardButton(value);
+                KeyboardRow entryRow = new KeyboardRow();
+                entryRow.add(entryButton);
+                keyboardRows.add(entryRow);
+            }
 
-        KeyboardRow paginationKeyboardRow = new KeyboardRow();
-        int pageNumber = ResultTableFormatter.getPageNumber();
-        if (pageNumber != 1) {
-            KeyboardButton previousPageKeyboardButton = new KeyboardButton(previousPageCommand.getEmoji().getString());
-            paginationKeyboardRow.add(previousPageKeyboardButton);
+            KeyboardRow paginationKeyboardRow = new KeyboardRow();
+            int pageNumber = ResultTableFormatter.getPageNumber();
+            if (pageNumber != 1) {
+                KeyboardButton previousPageKeyboardButton = new KeyboardButton(previousPageCommand.getEmoji().getString());
+                paginationKeyboardRow.add(previousPageKeyboardButton);
+            }
+            paginationKeyboardRow.add(String.valueOf(pageNumber));
+            if (pageNumber - 1 != ResultTableFormatter.getTotalPagesNumber()) {
+                KeyboardButton nextPageKeyboardButton = new KeyboardButton(nextPageCommand.getEmoji().getString());
+                paginationKeyboardRow.add(nextPageKeyboardButton);
+            }
+            keyboardRows.add(paginationKeyboardRow);
         }
-        paginationKeyboardRow.add(String.valueOf(pageNumber));
-        if (pageNumber - 1 != ResultTableFormatter.getTotalPagesNumber()) {
-            KeyboardButton nextPageKeyboardButton = new KeyboardButton(nextPageCommand.getEmoji().getString());
-            paginationKeyboardRow.add(nextPageKeyboardButton);
-        }
-        keyboardRows.add(paginationKeyboardRow);
         replyKeyboardMarkup.setKeyboard(keyboardRows);
         return replyKeyboardMarkup;
     }
@@ -146,13 +148,15 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             return true;
         } catch (IllegalArgumentException e1) {
             try {
-                String[] stringArray = string.split("\\. ");
-                if (stringArray.length > 0) {
-                    int entryNumber = Integer.parseInt(stringArray[0]);
-                    if (ResultTableFormatter.getCurrentPageEntries().containsKey(entryNumber)) {
-                        String message = addToVocabularyCommand.execute(entryNumber);
-                        sendMessageWithKeyboard(message, chatId);
-                        return true;
+                if (string.contains(". ")) {
+                    String[] stringArray = string.split("\\. ");
+                    if (stringArray.length > 0) {
+                        int entryNumber = Integer.parseInt(stringArray[0]);
+                        if (ResultTableFormatter.getCurrentPageEntries().containsKey(entryNumber)) {
+                            String message = addToVocabularyCommand.execute(entryNumber);
+                            sendMessageWithKeyboard(message, chatId);
+                            return true;
+                        }
                     }
                 }
                 Integer.parseInt(string);
