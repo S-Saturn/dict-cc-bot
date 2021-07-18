@@ -3,7 +3,7 @@ package freaking.raspberry.me.dictccbot.commands.custom;
 import freaking.raspberry.me.dictccbot.model.CustomCommandName;
 import freaking.raspberry.me.dictccbot.services.formatter.ResultTableFormatter;
 
-public class NextPageCommand implements CustomCommand {
+public class NextPageCommand implements CustomCommand, EmojiCommand {
     private final static CustomCommandName customCommandName = CustomCommandName.NEXT_PAGE;
 
     @Override

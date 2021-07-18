@@ -1,10 +1,7 @@
 package freaking.raspberry.me.dictccbot;
 
 import freaking.raspberry.me.dictccbot.commands.HelpCommand;
-import freaking.raspberry.me.dictccbot.commands.custom.ChangePrecisionCommand;
-import freaking.raspberry.me.dictccbot.commands.custom.ChangeTranslationDirectionCommand;
-import freaking.raspberry.me.dictccbot.commands.custom.NextPageCommand;
-import freaking.raspberry.me.dictccbot.commands.custom.PreviousPageCommand;
+import freaking.raspberry.me.dictccbot.commands.custom.*;
 import freaking.raspberry.me.dictccbot.model.CustomCommandName;
 import freaking.raspberry.me.dictccbot.services.TranslationService;
 import freaking.raspberry.me.dictccbot.services.dictionary.Entry;
@@ -24,6 +21,12 @@ import java.util.List;
 public class DictCcBot extends TelegramLongPollingCommandBot {
     private final String botUsername;
     private final String botToken;
+
+    private final ChangeTranslationDirectionCommand changeTranslationDirectionCommand = new ChangeTranslationDirectionCommand();
+    private final ChangePrecisionCommand changePrecisionCommand = new ChangePrecisionCommand();
+    private final NextPageCommand nextPageCommand = new NextPageCommand();
+    private final PreviousPageCommand previousPageCommand = new PreviousPageCommand();
+    private final AddToVocabularyCommand addToVocabularyCommand = new AddToVocabularyCommand();
 
     private String currentRequest = "";
 
@@ -87,7 +90,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         KeyboardRow settingsKeyboardRow = new KeyboardRow();
-        KeyboardButton changeTranslationDirectionButton = new KeyboardButton(CustomCommandName.CHANGE_TRANSLATION_DIRECTION.getEmojiList().get(0).getString());
+        KeyboardButton changeTranslationDirectionButton = new KeyboardButton(changeTranslationDirectionCommand.getEmoji().getString());
         KeyboardButton changeEntryPrecisionButton = new KeyboardButton(TranslationService.getEntryPrecision().getEmoji().getString());
         settingsKeyboardRow.add(changeTranslationDirectionButton);
         settingsKeyboardRow.add(changeEntryPrecisionButton);
@@ -104,12 +107,12 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
         KeyboardRow paginationKeyboardRow = new KeyboardRow();
         int pageNumber = ResultTableFormatter.getPageNumber();
         if (pageNumber != 1) {
-            KeyboardButton previousPageKeyboardButton = new KeyboardButton(CustomCommandName.PREVIOUS_PAGE.getEmojiList().get(0).getString());
+            KeyboardButton previousPageKeyboardButton = new KeyboardButton(previousPageCommand.getEmoji().getString());
             paginationKeyboardRow.add(previousPageKeyboardButton);
         }
         paginationKeyboardRow.add(String.valueOf(pageNumber));
         if (pageNumber - 1 != ResultTableFormatter.getTotalPagesNumber()) {
-            KeyboardButton nextPageKeyboardButton = new KeyboardButton(CustomCommandName.NEXT_PAGE.getEmojiList().get(0).getString());
+            KeyboardButton nextPageKeyboardButton = new KeyboardButton(nextPageCommand.getEmoji().getString());
             paginationKeyboardRow.add(nextPageKeyboardButton);
         }
         keyboardRows.add(paginationKeyboardRow);
@@ -123,17 +126,17 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             String message;
             switch (customCommandName) {
                 case CHANGE_TRANSLATION_DIRECTION:
-                    message = new ChangeTranslationDirectionCommand().execute();
+                    message = changeTranslationDirectionCommand.execute();
                     break;
                 case CHANGE_PRECISION:
-                    message = new ChangePrecisionCommand().execute();
+                    message = changePrecisionCommand.execute();
                     break;
                 case NEXT_PAGE:
-                    message = new NextPageCommand().execute();
+                    message = nextPageCommand.execute();
                     sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
                     break;
                 case PREVIOUS_PAGE:
-                    message = new PreviousPageCommand().execute();
+                    message = previousPageCommand.execute();
                     sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
                     break;
                 default:
@@ -141,8 +144,21 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             }
             sendMessageWithKeyboard(message, chatId);
             return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+        } catch (IllegalArgumentException e1) {
+            try {
+                String[] stringArray = string.split(". ");
+                if (stringArray.length > 0) {
+                    int entryNumber = Integer.parseInt(stringArray[0]);
+                    String message = addToVocabularyCommand.execute(entryNumber);
+                    sendMessageWithKeyboard(message, chatId);
+                    return true;
+                }
+                Integer.parseInt(string);
+                sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
+                return true;
+            } catch (NumberFormatException e2) {
+                return false;
+            }
         }
     }
 }

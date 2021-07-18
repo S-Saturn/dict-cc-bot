@@ -5,7 +5,7 @@ import freaking.raspberry.me.dictccbot.model.Emoji;
 import freaking.raspberry.me.dictccbot.model.TranslationDirection;
 import freaking.raspberry.me.dictccbot.services.TranslationService;
 
-public class ChangeTranslationDirectionCommand implements CustomCommand {
+public class ChangeTranslationDirectionCommand implements CustomCommand, EmojiCommand {
     private final static CustomCommandName customCommandName = CustomCommandName.CHANGE_TRANSLATION_DIRECTION;
 
     @Override
@@ -19,7 +19,6 @@ public class ChangeTranslationDirectionCommand implements CustomCommand {
                 + newTranslationDirection.getLanguageTo().getEmoji().getString();
     }
 
-    @Override
     public CustomCommandName getCustomCommandName() {
         return customCommandName;
     }
