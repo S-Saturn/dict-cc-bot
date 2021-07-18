@@ -146,7 +146,7 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
             return true;
         } catch (IllegalArgumentException e1) {
             try {
-                String[] stringArray = string.split(". ");
+                String[] stringArray = string.split("\\. ");
                 if (stringArray.length > 0) {
                     int entryNumber = Integer.parseInt(stringArray[0]);
                     String message = addToVocabularyCommand.execute(entryNumber);
