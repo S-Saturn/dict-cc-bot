@@ -149,9 +149,11 @@ public class DictCcBot extends TelegramLongPollingCommandBot {
                 String[] stringArray = string.split("\\. ");
                 if (stringArray.length > 0) {
                     int entryNumber = Integer.parseInt(stringArray[0]);
-                    String message = addToVocabularyCommand.execute(entryNumber);
-                    sendMessageWithKeyboard(message, chatId);
-                    return true;
+                    if (ResultTableFormatter.getCurrentPageEntries().containsKey(entryNumber)) {
+                        String message = addToVocabularyCommand.execute(entryNumber);
+                        sendMessageWithKeyboard(message, chatId);
+                        return true;
+                    }
                 }
                 Integer.parseInt(string);
                 sendMessageWithKeyboard(ResultTableFormatter.formatExistingEntriesToTable(), chatId);
